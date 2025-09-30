@@ -1,2 +1,8 @@
 # Aplicaci-n-web-Gestor-de-Tareas-lab_app_internet
 Aplicación web interactiva y responsiva con gestor de tareas full stack.
+
+Requisitos                                
+-astro
+-node.js  
+
+Para hacer funcionar , en una terminal nos movemos a la carpeta "proyecto_fullstack" y escribimos "npm run dev" y se abrira la pagina localmente en el puerto 4321
