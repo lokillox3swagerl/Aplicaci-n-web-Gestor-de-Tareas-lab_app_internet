@@ -12,5 +12,8 @@
     "@supabase/supabase-js": "^2.58.0",
     "astro": "^5.14.1",
     "bcryptjs": "^3.0.2"
+  },
+  "devDependencies": {
+    "@astrojs/vercel": "^8.2.8"
   }
 }
