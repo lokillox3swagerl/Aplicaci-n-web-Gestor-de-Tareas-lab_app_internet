@@ -1,0 +1,64 @@
+---
+import { addUser } from '../../lib/api';
+import bcrypt from 'bcryptjs';
+
+let message = "";
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const nombre = formData.get("nombre") as string;
+    const apellido = formData.get("apellido") as string;
+    const correo = formData.get("correo") as string;
+    const password = formData.get("password") as string;
+
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    await addUser({
+      nombre,
+      apellido,
+      correo,
+      contraseña: hashedPassword
+    });
+
+    message = "✅ Usuario registrado con éxito";
+  } catch (err) {
+    if (err instanceof Error) {
+      message = "❌ Error: " + err.message;
+    } else {
+      message = "❌ Error desconocido";
+    }
+  }
+}
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Registro de Usuario</title>
+  </head>
+  <body>
+    <h1>Registro de Usuario</h1>
+
+    {message && <p>{message}</p>}
+
+    <form method="POST" enctype="application/x-www-form-urlencoded">
+      <label>Nombre:</label><br />
+      <input type="text" name="nombre" required /><br /><br />
+
+      <label>Apellido:</label><br />
+      <input type="text" name="apellido" required /><br /><br />
+
+      <label>Correo:</label><br />
+      <input type="email" name="correo" required /><br /><br />
+
+      <label>Contraseña:</label><br />
+      <input type="password" name="password" required /><br /><br />
+
+      <button type="submit">Registrar</button>
+    </form>
+    <a href="/index">
+		<button>Ir al index</button>
+		</a>
+  </body>
+</html>

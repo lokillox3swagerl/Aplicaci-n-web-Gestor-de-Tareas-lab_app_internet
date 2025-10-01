@@ -1,5 +1,5 @@
 ---
-import { supabase } from '../../public/supabase';
+import { supabase } from '../../lib/supabase';
 
 let { data: users, error } = await supabase
   .from('users')
@@ -18,5 +18,8 @@ console.log(users, error);
 	</head>
 	<body>
 		<h1>Astro</h1>
+		<a href="/registro">
+		<button>Ir al Registro</button>
+		</a>
 	</body>
 </html>
