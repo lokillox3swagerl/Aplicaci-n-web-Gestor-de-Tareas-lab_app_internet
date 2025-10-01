@@ -1,5 +1,11 @@
 ---
+import { supabase } from '../../public/supabase';
 
+let { data: users, error } = await supabase
+  .from('users')
+  .select('*')
+
+console.log(users, error);
 ---
 
 <html lang="en">
