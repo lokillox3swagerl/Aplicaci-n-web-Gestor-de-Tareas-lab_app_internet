@@ -1,6 +1,6 @@
 ---
-import { addUser } from '../../lib/api';
-import bcrypt from 'bcryptjs';
+import { addUser } from "../lib/api";
+import bcrypt from "bcryptjs";
 
 let message = "";
 
@@ -18,44 +18,47 @@ if (Astro.request.method === "POST") {
       nombre,
       apellido,
       correo,
-      contraseña: hashedPassword
+      contraseña: hashedPassword,
     });
 
-    message = "✅ Usuario registrado con éxito";
+    message = "Usuario registrado con éxito";
   } catch (err) {
-    if (err instanceof Error) {
-      message = "❌ Error: " + err.message;
-    } else {
-      message = "❌ Error desconocido";
-    }
+    console.error("Error en registro:", err);
+    message = "No se pudo registrar el usuario";
   }
 }
 ---
 
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Registro de Usuario</title>
+    <title>Registro</title>
+    <link rel="stylesheet" href="/src/styles/registro.css" />
+    <script src="/src/scripts/registro.js" defer></script>
   </head>
   <body>
-    <h1>Registro de Usuario</h1>
+    <div class="registro-container">
+      <h1>Registro de Usuario</h1>
 
-    {message && <p>{message}</p>}
+      {message && <p class="mensaje">{message}</p>}
 
-    <form method="POST" enctype="application/x-www-form-urlencoded">
-      <label>Nombre:</label><br />
-      <input type="text" name="nombre" required /><br />
+      <form method="POST" class="registro-form">
+        <label>Nombre:</label>
+        <input type="text" name="nombre" required />
 
-      <label>Apellido:</label><br />
-      <input type="text" name="apellido" required /><br />
+        <label>Apellido:</label>
+        <input type="text" name="apellido" required />
 
-      <label>Correo:</label><br />
-      <input type="email" name="correo" required /><br />
+        <label>Correo:</label>
+        <input type="email" name="correo" required />
 
-      <label>Contraseña:</label><br />
-      <input type="password" name="password" required /><br />
+        <label>Contraseña:</label>
+        <input type="password" name="password" required />
 
-      <button type="submit">Registrar</button>
-    </form>
+        <button type="submit" class="btn-neon">Registrar</button>
+      </form>
+
+      <a href="/" class="volver">⬅ Volver al inicio</a>
+    </div>
   </body>
 </html>

@@ -10,10 +10,10 @@ export async function getUsers() {
 export async function addUser(user) {
   const { data, error } = await supabase.from('users').insert(user);
   if (error) {
-    console.error("❌ Error Supabase:", error.message);
+    console.error("Error Supabase:", error.message);
     throw error;
   }
-  console.log("✅ Insertado en BD:", data);
+  console.log("Insertado en BD:", data);
   return data;
 }
 
