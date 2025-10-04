@@ -1,0 +1,91 @@
+---
+import bcrypt from "bcryptjs";
+import { supabase } from "../lib/supabase";
+
+let message = "";
+let errorMsg = "";
+
+if (Astro.request.method === "POST") {
+  try {
+    const form = await Astro.request.formData();
+    const correo = String(form.get("correo") ?? "");
+    const password = String(form.get("password") ?? "");
+
+    if (!correo || !password) {
+      errorMsg = "Completa correo y contraseña";
+    } else {
+      const { data: user, error } = await supabase
+        .from("users")
+        .select("id, nombre, apellido, correo, contraseña")
+        .eq("correo", correo)
+        .maybeSingle();
+
+      if (error) {
+        errorMsg = error.message;
+      } else if (!user) {
+        errorMsg = "Usuario no encontrado";
+      } else {
+        const ok = bcrypt.compareSync(password, String(user["contraseña"]));
+        if (!ok) {
+          errorMsg = "Credenciales inválidas";
+        } else {
+          Astro.cookies.set("uid", String(user.id), {
+            path: "/",
+            httpOnly: true,
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24 * 7,
+          });
+          Astro.cookies.set("ucorreo", String(user.correo), {
+            path: "/",
+            httpOnly: true,
+            sameSite: "lax",
+            maxAge: 60 * 60 * 24 * 7,
+          });
+          return Astro.redirect("/gestor");
+        }
+      }
+    }
+  } catch (e) {
+    errorMsg = "Error de login";
+  }
+}
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Login</title>
+    <link rel="stylesheet" href="/src/styles/registro.css" />
+    <style>
+      .login-container{max-width:420px;margin:6vh auto;background:#111827;color:#e5e7eb;padding:1.5rem;border-radius:14px}
+      .login-container h1{margin:0 0 1rem}
+      .login-form{display:grid;gap:.75rem}
+      .login-form input{padding:.7rem .8rem;border-radius:10px;border:1px solid #1f2937;background:#0b1222;color:#e5e7eb}
+      .btn-neon{background:#6366f1;border:0;border-radius:10px;color:#fff;padding:.8rem;font-weight:700;cursor:pointer}
+      .btn-neon:hover{background:#4f46e5}
+      .mensaje{margin:.5rem 0;color:#a78bfa;min-height:1.25rem}
+      .error{color:#ef9a9a}
+      .volver{display:inline-block;margin-top:.75rem;color:#9ca3af}
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Iniciar sesión</h1>
+
+      {message && <p class="mensaje">{message}</p>}
+      {errorMsg && <p class="mensaje error">{errorMsg}</p>}
+
+      <form method="POST" class="login-form">
+        <label>Correo</label>
+        <input type="email" name="correo" required />
+
+        <label>Contraseña</label>
+        <input type="password" name="password" required />
+
+        <button type="submit" class="btn-neon">Entrar</button>
+      </form>
+
+      <a href="/registro" class="volver">¿No tienes cuenta? Regístrate</a>
+    </div>
+  </body>
+</html>

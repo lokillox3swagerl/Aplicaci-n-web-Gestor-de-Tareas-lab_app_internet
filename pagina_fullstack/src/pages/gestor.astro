@@ -1,0 +1,97 @@
+---
+const title = 'Gestor de Tareas';
+const uid = Number(Astro.cookies.get('uid')?.value || 0);
+if (!uid) return Astro.redirect('/login');
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/src/styles/gestor.css" />
+  </head>
+  <body>
+    <main class="container" data-uid={uid}>
+      <h1 class="page-title">{title}</h1>
+
+      <form id="frm" class="card card-form">
+        <div class="grid">
+          <div class="field">
+            <label class="label">Título</label>
+            <input name="titulo" class="input" required />
+          </div>
+          <div class="field">
+            <label class="label">Descripción</label>
+            <input name="descripcion" class="input" />
+          </div>
+          <div class="field">
+            <label class="label">Prioridad</label>
+            <select name="prioridad" class="input">
+              <option value="baja">Baja</option>
+              <option value="media" selected>Media</option>
+              <option value="alta">Alta</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label">Estado</label>
+            <select name="estado" class="input">
+              <option value="por_hacer" selected>Por hacer</option>
+              <option value="en_progreso">En progreso</option>
+              <option value="finalizada">Finalizada</option>
+            </select>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Guardar</button>
+            <button class="btn btn-ghost" type="button" id="btn-clear">Limpiar</button>
+          </div>
+
+          <input type="hidden" name="id_tarea" />
+          <div id="msg" class="msg"></div>
+        </div>
+      </form>
+
+      <section class="board-grid">
+        <div class="col">
+          <article class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="col-head">
+                <h2 class="col-title">Por hacer</h2>
+                <span class="badge" id="count-por_hacer">0</span>
+              </div>
+              <div id="col-por_hacer" class="stack"></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="col">
+          <article class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="col-head">
+                <h2 class="col-title">En progreso</h2>
+                <span class="badge info" id="count-en_progreso">0</span>
+              </div>
+              <div id="col-en_progreso" class="stack"></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="col">
+          <article class="card h-100 shadow-sm">
+            <div class="card-body">
+              <div class="col-head">
+                <h2 class="col-title">Finalizadas</h2>
+                <span class="badge success" id="count-finalizada">0</span>
+              </div>
+              <div id="col-finalizada" class="stack"></div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+    <script type="module">
+      import '../scripts/gestor.js';
+    </script>
+  </body>
+</html>
