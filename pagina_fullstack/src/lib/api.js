@@ -17,29 +17,51 @@ export async function addUser(user) {
   return data;
 }
 
-// Tareas
-export async function getTasks(userId) {
+/** Lista tareas por usuario */
+export async function getTasksByUser(id_usuario) {
   const { data, error } = await supabase
-    .from('tasks')
+    .from('tarea')
     .select('*')
-    .eq('user_id', userId);
+    .eq('id_usuario', id_usuario)
+    .order('id_tarea', { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Crea una tarea */
+export async function createTask({ id_usuario, titulo, descripcion = '', prioridad = 'media', estado = 'por_hacer' }) {
+  const payload = { id_usuario, titulo, descripcion, prioridad, estado };
+  const { data, error } = await supabase
+    .from('tarea')
+    .insert([payload])
+    .select('*')
+    .single();
+
   if (error) throw error;
   return data;
 }
 
-export async function addTask(task) {
-  const { data, error } = await supabase.from('tasks').insert(task);
+/** Actualiza campos de una tarea */
+export async function updateTask(id_tarea, fields) {
+  const { data, error } = await supabase
+    .from('tarea')
+    .update(fields)
+    .eq('id_tarea', id_tarea)
+    .select('*')
+    .single();
+
   if (error) throw error;
   return data;
 }
 
-export async function updateTask(id, fields) {
-  const { data, error } = await supabase.from('tasks').update(fields).eq('id', id);
-  if (error) throw error;
-  return data;
-}
+/** Elimina una tarea */
+export async function deleteTask(id_tarea) {
+  const { error } = await supabase
+    .from('tarea')
+    .delete()
+    .eq('id_tarea', id_tarea);
 
-export async function deleteTask(id) {
-  const { error } = await supabase.from('tasks').delete().eq('id', id);
   if (error) throw error;
+  return true;
 }
