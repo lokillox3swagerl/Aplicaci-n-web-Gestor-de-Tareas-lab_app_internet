@@ -1,5 +1,6 @@
 ---
 import { getTasksByUser, createTask, updateTask, deleteTask } from "../lib/api";
+import "../styles/gestor.css";
 
 let message = "";
 let errorMsg = "";
@@ -59,7 +60,6 @@ const title = "Gestor de Tareas";
     <meta charset="utf-8" />
     <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/src/styles/gestor.css" />
     <script src="../scripts/gestor.js" defer></script>
     <script src="../scripts/sidebar.js" defer></script> {/* toggle móvil */}
   </head>

@@ -1,6 +1,7 @@
 ---
 import { addUser } from "../lib/api";
 import bcrypt from "bcryptjs";
+import "../styles/registro.css";
 
 let message = "";
 
@@ -33,7 +34,6 @@ if (Astro.request.method === "POST") {
   <head>
     <meta charset="utf-8" />
     <title>Registro</title>
-    <link rel="stylesheet" href="/src/styles/registro.css" />
     <script src="/src/scripts/registro.js" defer></script>
   </head>
   <body>

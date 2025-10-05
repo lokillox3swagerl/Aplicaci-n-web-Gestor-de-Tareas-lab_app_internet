@@ -1,6 +1,7 @@
 ---
 import bcrypt from "bcryptjs";
 import { supabase } from "../lib/supabase";
+import "../styles/login.css";
 
 let message = "";
 let errorMsg = "";
@@ -74,7 +75,6 @@ const title = "Iniciar sesión";
     <meta charset="utf-8" />
     <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/src/styles/login.css" />
     <script src="/src/scripts/login.js" defer></script>
   </head>
   <body>
