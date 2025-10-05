@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const hiddenAction = form.querySelector("input[name='action']");
   const hiddenId = form.querySelector("input[name='id_tarea']");
 
-  // Validación mínima tipo registro
   form.addEventListener("submit", (e) => {
     if (!inputTitulo.value || inputTitulo.value.trim().length < 3) {
       e.preventDefault();
@@ -29,7 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
     inputTitulo.focus();
   });
 
-  // Cargar datos de la tarjeta al form para editar (SSR simple)
   document.querySelectorAll(".task-card .btn-edit").forEach((btn) => {
     btn.addEventListener("click", (ev) => {
       const card = ev.target.closest(".task-card");
@@ -40,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       selPrioridad.value = card.dataset.prioridad || "media";
       selEstado.value = card.dataset.estado || "por_hacer";
       hiddenId.value = card.dataset.id_tarea || "";
-      hiddenAction.value = "update"; // el POST del servidor usará updateTask si quieres agregarlo
+      hiddenAction.value = "update";
 
       window.scrollTo({ top: 0, behavior: "smooth" });
       inputTitulo.focus();

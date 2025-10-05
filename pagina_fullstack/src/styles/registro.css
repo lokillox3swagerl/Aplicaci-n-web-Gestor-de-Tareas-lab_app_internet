@@ -72,7 +72,6 @@ body {
   outline: none;
 }
 
-/* Botón principal (neón sobrio) */
 .btn-neon {
   background: var(--accent);
   color: #041017;
