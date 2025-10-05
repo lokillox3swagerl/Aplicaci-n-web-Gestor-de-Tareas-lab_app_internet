@@ -1,6 +1,8 @@
 ---
 import { supabase } from '../lib/supabase';
 import '../styles/index.css';
+import { Image } from 'astro:assets';
+import imagenInicio from '../images/imagen_inicio.png';
 
 let { data: users, error } = await supabase
   .from('users')
@@ -28,7 +30,7 @@ console.log(users, error);
     <main class="hero">
       <div class="hero-image">
         <div class="image-placeholder">
-          <img src="/src/images/imagen_inicio.png" />          
+        <Image src={imagenInicio} alt="Portada" />        
         </div>
       </div>
       <div class="hero-text">
