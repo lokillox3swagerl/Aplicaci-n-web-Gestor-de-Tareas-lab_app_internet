@@ -5,10 +5,16 @@ import { supabase } from "../lib/supabase";
 let message = "";
 let errorMsg = "";
 
+// Si ya hay sesión, redirige
+const existing = Astro.cookies.get("uid")?.value;
+if (existing) {
+  return Astro.redirect("/gestor");
+}
+
 if (Astro.request.method === "POST") {
   try {
     const form = await Astro.request.formData();
-    const correo = String(form.get("correo") ?? "");
+    const correo = String(form.get("correo") ?? "").trim().toLowerCase();
     const password = String(form.get("password") ?? "");
 
     if (!correo || !password) {
@@ -16,7 +22,7 @@ if (Astro.request.method === "POST") {
     } else {
       const { data: user, error } = await supabase
         .from("users")
-        .select("id, nombre, apellido, correo, contraseña")
+        .select("*")
         .eq("correo", correo)
         .maybeSingle();
 
@@ -25,67 +31,71 @@ if (Astro.request.method === "POST") {
       } else if (!user) {
         errorMsg = "Usuario no encontrado";
       } else {
-        const ok = bcrypt.compareSync(password, String(user["contraseña"]));
+        const hash = String((user as any)?.["contraseña"] ?? "");
+        const ok = hash && bcrypt.compareSync(password, hash);
+
         if (!ok) {
           errorMsg = "Credenciales inválidas";
         } else {
-          Astro.cookies.set("uid", String(user.id), {
+          const uid = Number((user as any)?.id ?? 0);
+          if (!uid) throw new Error("Usuario sin identificador válido.");
+
+          Astro.cookies.set("uid", String(uid), {
             path: "/",
             httpOnly: true,
             sameSite: "lax",
-            maxAge: 60 * 60 * 24 * 7,
+            secure: true,
+            maxAge: 60 * 60 * 24 * 7, // 7 días
           });
-          Astro.cookies.set("ucorreo", String(user.correo), {
+
+          Astro.cookies.set("ucorreo", String(user.correo ?? ""), {
             path: "/",
             httpOnly: true,
             sameSite: "lax",
+            secure: true,
             maxAge: 60 * 60 * 24 * 7,
           });
+
           return Astro.redirect("/gestor");
         }
       }
     }
   } catch (e) {
+    console.error("[login] error:", e);
     errorMsg = "Error de login";
   }
 }
+
+const title = "Iniciar sesión";
 ---
 
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <title>Login</title>
-    <link rel="stylesheet" href="/src/styles/registro.css" />
-    <style>
-      .login-container{max-width:420px;margin:6vh auto;background:#111827;color:#e5e7eb;padding:1.5rem;border-radius:14px}
-      .login-container h1{margin:0 0 1rem}
-      .login-form{display:grid;gap:.75rem}
-      .login-form input{padding:.7rem .8rem;border-radius:10px;border:1px solid #1f2937;background:#0b1222;color:#e5e7eb}
-      .btn-neon{background:#6366f1;border:0;border-radius:10px;color:#fff;padding:.8rem;font-weight:700;cursor:pointer}
-      .btn-neon:hover{background:#4f46e5}
-      .mensaje{margin:.5rem 0;color:#a78bfa;min-height:1.25rem}
-      .error{color:#ef9a9a}
-      .volver{display:inline-block;margin-top:.75rem;color:#9ca3af}
-    </style>
+    <title>{title}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/src/styles/login.css" />
+    <script src="/src/scripts/login.js" defer></script>
   </head>
   <body>
     <div class="login-container">
-      <h1>Iniciar sesión</h1>
+      <h1>{title}</h1>
 
-      {message && <p class="mensaje">{message}</p>}
-      {errorMsg && <p class="mensaje error">{errorMsg}</p>}
+      {errorMsg && <p class="mensaje error">⚠ {errorMsg}</p>}
+      {message && <p class="mensaje ok">{message}</p>}
 
-      <form method="POST" class="login-form">
-        <label>Correo</label>
-        <input type="email" name="correo" required />
+      <form method="POST" class="login-form" novalidate>
+        <label for="correo">Correo</label>
+        <input id="correo" name="correo" type="email" required autocomplete="email" />
 
-        <label>Contraseña</label>
-        <input type="password" name="password" required />
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" />
 
         <button type="submit" class="btn-neon">Entrar</button>
       </form>
 
-      <a href="/registro" class="volver">¿No tienes cuenta? Regístrate</a>
+      <a href="/registro" class="volver">¿No tienes cuenta? Regístrate</a> <br>
+      <a href="/" class="volver">⬅ Volver al inicio</a>
     </div>
   </body>
 </html>

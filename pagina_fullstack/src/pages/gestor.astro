@@ -4,14 +4,14 @@ import { getTasksByUser, createTask, updateTask, deleteTask } from "../lib/api";
 let message = "";
 let errorMsg = "";
 
-// 1) Obtener id_usuario desde cookie
+//Obtener id_usuario desde cookie
 const uidCookie = Astro.cookies.get("uid")?.value;
 const id_usuario = uidCookie ? Number(uidCookie) : 0;
 if (!id_usuario) {
   return Astro.redirect("/login");
 }
 
-// 2) Manejar POST (crear / actualizar estado / borrar)
+//Manejar POST (crear / actualizar estado / borrar)
 if (Astro.request.method === "POST") {
   try {
     const form = await Astro.request.formData();
@@ -49,7 +49,7 @@ if (Astro.request.method === "POST") {
   }
 }
 
-// 3) Cargar tareas del usuario
+//Cargar tareas del usuario
 const tasks = await getTasksByUser(id_usuario);
 const title = "Gestor de Tareas";
 ---
@@ -60,129 +60,191 @@ const title = "Gestor de Tareas";
     <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="/src/styles/gestor.css" />
-    <script src="/src/scripts/gestor.js" defer></script>
+    <script src="../scripts/gestor.js" defer></script>
+    <script src="../scripts/sidebar.js" defer></script> {/* toggle móvil */}
   </head>
-  <body>
-    <main class="container">
-      <h1 class="page-title">{title}</h1>
+  <body class="app">
 
-      {message && <p class="mensaje ok">{message}</p>}
-      {errorMsg && <p class="mensaje error">⚠ {errorMsg}</p>}
+    <div class="app-shell">
 
-      <!-- Formularo MUY simple -->
-      <form method="POST" class="card card-form" id="task-form">
-        <div class="grid">
-          <div class="field">
-            <label class="label">Título *</label>
-            <input class="input" name="titulo" required />
-          </div>
-
-          <div class="field">
-            <label class="label">Descripción</label>
-            <input class="input" name="descripcion" />
-          </div>
-
-          <div class="field">
-            <label class="label">Prioridad</label>
-            <select class="input" name="prioridad">
-              <option value="baja">Baja</option>
-              <option value="media" selected>Media</option>
-              <option value="alta">Alta</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label class="label">Estado</label>
-            <select class="input" name="estado">
-              <option value="por_hacer" selected>Por hacer</option>
-              <option value="en_progreso">En progreso</option>
-              <option value="finalizada">Finalizada</option>
-            </select>
-          </div>
-
-          <div class="actions">
-            <button class="btn btn-primary" type="submit">Guardar</button>
-            <button class="btn btn-ghost" type="button" id="btn-clear">Limpiar</button>
-          </div>
-
-          <!-- Acción del POST -->
-          <input type="hidden" name="action" value="create" />
-          <!-- estos son útiles cuando editas desde el front (no SSR) -->
-          <input type="hidden" name="id_tarea" />
+      <aside class="sidebar" aria-label="Navegación del gestor">
+        <div class="sidebar-top">
+          <a href="/" class="brand">Mi Gestor</a>
+          <button class="sidebar-toggle" aria-label="Cerrar menú" title="Cerrar menú">✕</button>
         </div>
-      </form>
 
-      <!-- Lista simple (una columna) -->
-      <section class="board-grid">
-        <div class="col">
-          <article class="card h-100 shadow-sm">
-            <div class="card-body">
-              <div class="col-head">
-                <h2 class="col-title">Mis tareas</h2>
-                <span class="badge">{tasks.length}</span>
+        <nav class="sidebar-nav">
+          <a href="/" class="nav-item">
+            <span class="icon">🏠</span> Inicio
+          </a>
+
+          <a href="/gestor" class={`nav-item ${Astro.url.searchParams.get('estado') ? '' : 'active'}`} aria-current={!Astro.url.searchParams.get('estado') ? 'page' : undefined}>
+            <span class="icon">🗂️</span> Todas
+            <span class="pill-count">{tasks.length}</span>
+          </a>
+
+          <a href="/gestor?estado=por_hacer" class={`nav-item ${Astro.url.searchParams.get('estado')==='por_hacer'?'active':''}`}>
+            <span class="icon">📝</span> Por hacer
+            <span class="pill-count">
+              {tasks.filter(t => t.estado==='por_hacer').length}
+            </span>
+          </a>
+
+          <a href="/gestor?estado=en_progreso" class={`nav-item ${Astro.url.searchParams.get('estado')==='en_progreso'?'active':''}`}>
+            <span class="icon">⚙️</span> En progreso
+            <span class="pill-count">
+              {tasks.filter(t => t.estado==='en_progreso').length}
+            </span>
+          </a>
+
+          <a href="/gestor?estado=finalizada" class={`nav-item ${Astro.url.searchParams.get('estado')==='finalizada'?'active':''}`}>
+            <span class="icon">✅</span> Finalizadas
+            <span class="pill-count">
+              {tasks.filter(t => t.estado==='finalizada').length}
+            </span>
+          </a>
+        </nav>
+
+        <div class="sidebar-actions">
+          <a href="#task-form" class="btn btn-primary w-full">+ Nueva tarea</a>
+
+          <form method="POST" action="/logout">
+            <button class="btn btn-ghost w-full" type="submit">Cerrar sesión</button>
+          </form>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="content-header">
+          <button class="burger" aria-label="Abrir menú" title="Abrir menú">☰</button>
+          <h1 class="page-title">{title}</h1>
+        </header>
+
+        {message && <p class="mensaje ok">{message}</p>}
+        {errorMsg && <p class="mensaje error">⚠ {errorMsg}</p>}
+
+        <main class="container">
+          <form method="POST" class="card card-form" id="task-form">
+            <div class="grid">
+              <div class="field">
+                <label class="label" for="titulo">Título *</label>
+                <input class="input" id="titulo" name="titulo" required />
               </div>
 
-              <div class="stack">
-                {tasks.map((t) => (
-                  <article class="card task-card shadow-sm"
-                    data-id_tarea={t.id_tarea}
-                    data-titulo={t.titulo}
-                    data-descripcion={t.descripcion || ""}
-                    data-prioridad={t.prioridad}
-                    data-estado={t.estado}>
-                    <div class="card-body">
-                      <div class="task-head">
-                        <h3 class="h6 card-title">{t.titulo}</h3>
-                        <span class={`pill ${t.prioridad === 'alta' ? 'danger' : t.prioridad === 'media' ? 'warn' : 'mute'}`}>
-                          {t.prioridad}
-                        </span>
-                      </div>
-                      {t.descripcion && <p class="card-text">{t.descripcion}</p>}
-                      <div class="task-meta">
-                        <span class="pill mute">{t.estado}</span>
-                      </div>
-
-                      <div class="task-actions">
-                        <!-- Cambiar estado rápido -->
-                        <form method="POST" class="inline">
-                          <input type="hidden" name="action" value="set_status" />
-                          <input type="hidden" name="id_tarea" value={t.id_tarea} />
-                          <input type="hidden" name="estado" value="por_hacer" />
-                          <button class="btn btn-ghost" type="submit">Por hacer</button>
-                        </form>
-
-                        <form method="POST" class="inline">
-                          <input type="hidden" name="action" value="set_status" />
-                          <input type="hidden" name="id_tarea" value={t.id_tarea} />
-                          <input type="hidden" name="estado" value="en_progreso" />
-                          <button class="btn btn-ghost" type="submit">En progreso</button>
-                        </form>
-
-                        <form method="POST" class="inline">
-                          <input type="hidden" name="action" value="set_status" />
-                          <input type="hidden" name="id_tarea" value={t.id_tarea} />
-                          <input type="hidden" name="estado" value="finalizada" />
-                          <button class="btn btn-ghost" type="submit">Finalizada</button>
-                        </form>
-
-                        <span class="spacer"></span>
-                        <button class="btn btn-ghost btn-edit" type="button">Editar</button>
-
-                        <!-- Borrar -->
-                        <form method="POST" class="inline" onsubmit="return confirm('¿Eliminar tarea?')">
-                          <input type="hidden" name="action" value="delete" />
-                          <input type="hidden" name="id_tarea" value={t.id_tarea} />
-                          <button class="btn btn-danger" type="submit">Eliminar</button>
-                        </form>
-                      </div>
-                    </div>
-                  </article>
-                ))}
+              <div class="field">
+                <label class="label" for="descripcion">Descripción</label>
+                <input class="input" id="descripcion" name="descripcion" />
               </div>
+
+              <div class="field">
+                <label class="label" for="prioridad">Prioridad</label>
+                <select class="input" id="prioridad" name="prioridad">
+                  <option value="baja">Baja</option>
+                  <option value="media" selected>Media</option>
+                  <option value="alta">Alta</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label class="label" for="estado">Estado</label>
+                <select class="input" id="estado" name="estado">
+                  <option value="por_hacer" selected>Por hacer</option>
+                  <option value="en_progreso">En progreso</option>
+                  <option value="finalizada">Finalizada</option>
+                </select>
+              </div>
+
+              <div class="actions">
+                <button class="btn btn-primary" type="submit">Guardar</button>
+                <button class="btn btn-ghost" type="button" id="btn-clear">Limpiar</button>
+              </div>
+
+              <input type="hidden" name="action" value="create" />
+              <input type="hidden" name="id_tarea" />
             </div>
-          </article>
-        </div>
-      </section>
-    </main>
+          </form>
+
+          {
+            (() => {
+              const estado = Astro.url.searchParams.get('estado');
+              const list = estado ? tasks.filter(t => t.estado === estado) : tasks;
+
+              return (
+                <section class="board-grid">
+                  <div class="col">
+                    <article class="card h-100">
+                      <div class="card-body">
+                        <div class="col-head">
+                          <h2 class="col-title">
+                            {estado ? `Tareas: ${estado.replace('_',' ')}` : 'Todas las tareas'}
+                          </h2>
+                          <span class="badge">{list.length}</span>
+                        </div>
+
+                        <div class="stack">
+                          {list.map((t) => (
+                            <article class="card task-card"
+                              data-id_tarea={t.id_tarea}
+                              data-titulo={t.titulo}
+                              data-descripcion={t.descripcion || ""}
+                              data-prioridad={t.prioridad}
+                              data-estado={t.estado}>
+                              <div class="card-body">
+                                <div class="task-head">
+                                  <h3 class="h6 card-title">{t.titulo}</h3>
+                                  <span class={`pill ${t.prioridad === 'alta' ? 'danger' : t.prioridad === 'media' ? 'warn' : 'mute'}`}>
+                                    {t.prioridad}
+                                  </span>
+                                </div>
+                                {t.descripcion && <p class="card-text">{t.descripcion}</p>}
+                                <div class="task-meta">
+                                  <span class="pill mute">{t.estado}</span>
+                                </div>
+
+                                <div class="task-actions">
+                                  <form method="POST" class="inline">
+                                    <input type="hidden" name="action" value="set_status" />
+                                    <input type="hidden" name="id_tarea" value={t.id_tarea} />
+                                    <input type="hidden" name="estado" value="por_hacer" />
+                                    <button class="btn btn-ghost" type="submit">Por hacer</button>
+                                  </form>
+
+                                  <form method="POST" class="inline">
+                                    <input type="hidden" name="action" value="set_status" />
+                                    <input type="hidden" name="id_tarea" value={t.id_tarea} />
+                                    <input type="hidden" name="estado" value="en_progreso" />
+                                    <button class="btn btn-ghost" type="submit">En progreso</button>
+                                  </form>
+
+                                  <form method="POST" class="inline">
+                                    <input type="hidden" name="action" value="set_status" />
+                                    <input type="hidden" name="id_tarea" value={t.id_tarea} />
+                                    <input type="hidden" name="estado" value="finalizada" />
+                                    <button class="btn btn-ghost" type="submit">Finalizada</button>
+                                  </form>
+
+                                  <span class="spacer"></span>
+                                  <button class="btn btn-ghost btn-edit" type="button">Editar</button>
+
+                                  <form method="POST" class="inline" onsubmit="return confirm('¿Eliminar tarea?')">
+                                    <input type="hidden" name="action" value="delete" />
+                                    <input type="hidden" name="id_tarea" value={t.id_tarea} />
+                                    <button class="btn btn-danger" type="submit">Eliminar</button>
+                                  </form>
+                                </div>
+                              </div>
+                            </article>
+                          ))}
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </section>
+              );
+            })()
+          }
+        </main>
+      </div>
+    </div>
   </body>
 </html>
