@@ -6,7 +6,7 @@ export async function getUsers() {
   if (error) throw error;
   return data;
 }
-
+//Añade usuarios a la bd
 export async function addUser(user) {
   const { data, error } = await supabase.from('users').insert(user);
   if (error) {
@@ -17,7 +17,7 @@ export async function addUser(user) {
   return data;
 }
 
-/** Lista tareas por usuario */
+// Lista tareas por usuario
 export async function getTasksByUser(id_usuario) {
   const { data, error } = await supabase
     .from('tarea')
@@ -29,7 +29,7 @@ export async function getTasksByUser(id_usuario) {
   return data ?? [];
 }
 
-/** Crea una tarea */
+//Crea una tarea
 export async function createTask({ id_usuario, titulo, descripcion = '', prioridad = 'media', estado = 'por_hacer' }) {
   const payload = { id_usuario, titulo, descripcion, prioridad, estado };
   const { data, error } = await supabase
@@ -42,7 +42,7 @@ export async function createTask({ id_usuario, titulo, descripcion = '', priorid
   return data;
 }
 
-/** Actualiza campos de una tarea */
+//Actualiza campos de una tarea
 export async function updateTask(id_tarea, fields) {
   const { data, error } = await supabase
     .from('tarea')
@@ -55,7 +55,7 @@ export async function updateTask(id_tarea, fields) {
   return data;
 }
 
-/** Elimina una tarea */
+//Elimina una tarea
 export async function deleteTask(id_tarea) {
   const { error } = await supabase
     .from('tarea')
@@ -64,4 +64,15 @@ export async function deleteTask(id_tarea) {
 
   if (error) throw error;
   return true;
+}
+//Busca un usuario por correo
+export async function getUserByCorreo(correo) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('correo', correo)
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error;
+  return data ?? null;
 }

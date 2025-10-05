@@ -1,0 +1,11 @@
+---
+if (Astro.request.method === "POST") {
+  // Borra ambas cookies de sesion
+  Astro.cookies.delete("uid", { path: "/" });
+  Astro.cookies.delete("ucorreo", { path: "/" });
+
+  return Astro.redirect("/login");
+}
+
+return Astro.redirect("/gestor");
+---
