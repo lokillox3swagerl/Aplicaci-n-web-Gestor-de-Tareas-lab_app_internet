@@ -1,5 +1,6 @@
 ---
 import { supabase } from '../lib/supabase';
+import '../styles/index.css';
 
 let { data: users, error } = await supabase
   .from('users')
@@ -13,7 +14,6 @@ console.log(users, error);
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<link rel="stylesheet" href="../styles/index.css" />
 		<title>Gestor de Tareas</title>
 	</head>
   <body>
