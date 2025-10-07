@@ -38,6 +38,8 @@ body {
   padding: 1rem 2rem;
   background: var(--layer);
   border-bottom: 1px solid var(--muted);
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 .logo {
   font-size: 1.25rem;
